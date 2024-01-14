@@ -20,6 +20,7 @@ x-app-template: &APP_TEMPLATE
     - .envs/.mlflow-dev
   volumes:
     - ./:/app/
+    - mlflow-artifact-store:/mlflow-artifact-store
     - ~/.config/gcloud/:/home/${USER_NAME}/.config/gcloud
   ipc: host
   init: true
@@ -36,6 +37,8 @@ services:
       - postgresql-mlflow-data:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    profiles:
+      - dev
 
   app-dev:
     <<: *APP_TEMPLATE

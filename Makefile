@@ -20,14 +20,15 @@ endif
 PROD_SERVICE_NAME = app-prod
 PROD_CONTAINER_NAME = cybulde-model-prod-container
 
-ifeq (, $(shell which nvidia-smi))
-	PROFILE = ci
-	CONTAINER_NAME = cybulde-model-ci-container
-	SERVICE_NAME = app-ci
-else
-	PROFILE = dev
-	CONTAINER_NAME = cybulde-model-dev-container
-	SERVICE_NAME = app-dev
+#ifeq (, $(shell which nvidia-smi))
+#PROFILE = ci
+#CONTAINER_NAME = cybulde-model-ci-container
+#SERVICE_NAME = app-ci
+#else
+PROFILE = dev
+CONTAINER_NAME = cybulde-model-dev-container
+SERVICE_NAME = app-dev
+#endif
 
 DIRS_TO_VALIDATE = cybulde
 DOCKER_COMPOSE_RUN = $(DOCKER_COMPOSE_COMMAND) run --rm $(SERVICE_NAME)
@@ -96,11 +97,14 @@ build-for-dependencies:
 
 ## Lock dependencies with poetry
 lock-dependencies: build-for-dependencies
-	$(DOCKER_COMPOSE_RUN) bash -c "if [ -e /home/emkademy/poetry.lock.build ]; then cp /home/emkademy/poetry.lock.build ./poetry.lock; else poetry lock; fi"
+	$(DOCKER_COMPOSE_RUN) bash -c "if [ -e /home/wanruiha/poetry.lock.build ]; then cp /home/wanruiha/poetry.lock.build ./poetry.lock; else poetry lock; fi"
 
 ## Starts docker containers using "docker-compose up -d"
 up:
-	$(DOCKER_COMPOSE_COMMAND) up -d
+ifeq (, $(shell docker ps -a | grep $(CONTAINER_NAME)))
+	@make down
+endif
+	@$(DOCKER_COMPOSE_COMMAND) --profile $(PROFILE) up -d --remove-orphans
 
 ## docker-compose down
 down:
